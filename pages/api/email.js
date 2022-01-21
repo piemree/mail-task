@@ -5,25 +5,27 @@ let t = {};
 
 export default async function handler(req, res) {
   if (req.method == "POST") {
-    if (t.access_token) {
+    if (Object.keys(t).length === 0) {
       const result = await login();
       t = Object.assign(t, result.data.resultObject);
     }
 
     try {
-      const result1 = await sendMail(req.body);
-
-      return res.status(200).send(result1.data);
+      const { data } = await sendMail(req.body);
+      return res.status(200).send(data);
     } catch (error) {
-      try {
-        const result = await login();
-        t = Object.assign(t, result.data.resultObject);
-        const result3 = await sendMail(req.body);
-        console.log(result3.data);
-        return res.status(200).send(result3.data);
-      } catch (error) {
-        return res.status(500).send(error);
+      if (error.response?.status == 401) {
+
+        try {
+          const result = await login();
+          t = Object.assign(t, result.data?.resultObject);
+          const { data } = await sendMail(req.body);
+          return res.status(200).send(data);
+        } catch (error) {
+          return res.status(500).send(error.response);
+        }
       }
+      return res.status(500).send(error.response);
     }
   }
 }
@@ -38,7 +40,8 @@ function sendMail(data) {
 
 function login() {
   return axios.post("https://useapi.useinbox.com/token", {
-    EmailAddress: "emre.demir@tazebt.com",
-    Password: "Lftixyz1.",
+    EmailAddress: process.env.EMAIL,
+    Password: process.env.PASSWORD,
   });
 }
+

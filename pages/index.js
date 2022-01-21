@@ -19,7 +19,9 @@ export default function Home() {
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
   const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [errorr, setError] = useState(false);
+  const [errorrMessage, setErrorrMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [emptyError, setEmptyError] = useState(false);
 
@@ -41,17 +43,19 @@ export default function Home() {
       .post("/api/email", {
         from: {
           name: from.name,
-          email: process.env.NEXT_PUBLIC_EMAIL,
+          email: process.env.EMAIL,
         },
-        to: [{ email: process.env.NEXT_PUBLIC_EMAIL }],
+        to: [{ email: process.env.EMAIL }],
         subject,
         htmlContent: `<html><body><h3>From: ${from.email}</h3><p>${content}</p></body></html>`,
       })
       .then((result) => {
+        setSuccessMessage(result.data.resultMessage);
         setLoading(false);
         setSuccess(true);
       })
       .catch((err) => {
+        setErrorrMessage(err.response.statusText);
         setLoading(false);
         setError(true);
       });
@@ -153,7 +157,7 @@ export default function Home() {
             }
             sx={{ mb: 2 }}
           >
-            Success
+            {successMessage}
           </Alert>
         </Collapse>
         <Collapse in={errorr}>
@@ -172,7 +176,7 @@ export default function Home() {
             }
             sx={{ mb: 2 }}
           >
-            Error
+            {errorrMessage}
           </Alert>
         </Collapse>
         <Collapse in={emptyError}>
