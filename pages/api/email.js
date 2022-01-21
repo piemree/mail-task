@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
       return res.status(200).send(result1.data);
     } catch (error) {
-      if (error.response?.status == 401) {
+      if (error.data?.resultCode == 401 || error.response?.status == 401) {
         try {
           const result2 = await getRefreshToken();
 
@@ -28,11 +28,11 @@ export default async function handler(req, res) {
 
           return res.status(200).send(result3.data);
         } catch (error) {
-          console.log(error.response.data);
-          return res.status(500).send(error.response.data);
+          console.log(error);
+          return res.status(500).send(error);
         }
       }
-      console.log(error.response.data);
+      console.log(error);
       return res.status(500).send(error);
     }
   }
@@ -48,7 +48,7 @@ function sendMail(data) {
 
 function login() {
   return axios.post("https://useapi.useinbox.com/token", {
-    EmailAddress: "xpokales@gmail.com",
+    EmailAddress: "emre.demir@tazebt.com",
     Password: "Lftixyz1.",
   });
 }

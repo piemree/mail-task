@@ -21,16 +21,31 @@ export default function Home() {
   const [success, setSuccess] = useState(false);
   const [errorr, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emptyError, setEmptyError] = useState(false);
 
   const handleSubmit = (event) => {
-    setLoading(true);
     event.preventDefault();
+
+    if (
+      from.name.length === 0 ||
+      from.email.length === 0 ||
+      subject.length === 0 ||
+      content.length === 0
+    ) {
+      setEmptyError(true);
+      return;
+    }
+
+    setLoading(true);
     axios
       .post("/api/email", {
-        from,
+        from: {
+          name: from.name,
+          email: process.env.NEXT_PUBLIC_EMAIL,
+        },
         to: [{ email: process.env.NEXT_PUBLIC_EMAIL }],
         subject,
-        htmlContent: `<html><body>${content}</body></html>`,
+        htmlContent: `<html><body><h3>From: ${from.email}</h3><p>${content}</p></body></html>`,
       })
       .then((result) => {
         setLoading(false);
@@ -85,7 +100,6 @@ export default function Home() {
             onChange={(event) => setFrom({ ...from, name: event.target.value })}
             style={{ marginBottom: "2rem", width: "15rem" }}
             id="my-input"
-            aria-describedby="my-helper-text"
           />
 
           <TextField
@@ -119,7 +133,8 @@ export default function Home() {
           />
 
           <Button type="submit">
-            {!loading && "Submit"} {loading && <CircularProgress style={{padding: "10px"}} />}
+            {!loading && "Submit"}{" "}
+            {loading && <CircularProgress style={{ padding: "10px" }} />}
           </Button>
         </form>
         <Collapse in={success}>
@@ -158,6 +173,25 @@ export default function Home() {
             sx={{ mb: 2 }}
           >
             Error
+          </Alert>
+        </Collapse>
+        <Collapse in={emptyError}>
+          <Alert
+            severity="error"
+            action={
+              <IconButton
+                aria-label="close"
+                size="small"
+                onClick={() => {
+                  setEmptyError(false);
+                }}
+              >
+                <CloseOutlined fontSize="inherit" />
+              </IconButton>
+            }
+            sx={{ mb: 2 }}
+          >
+            Please fill all fields
           </Alert>
         </Collapse>
       </Container>
