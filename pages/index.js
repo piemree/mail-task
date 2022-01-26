@@ -1,6 +1,5 @@
 import Head from "next/head";
 import React, { useState } from "react";
-import ReactDOM from "react-dom";
 import Button from "@mui/material/Button";
 import axios from "axios";
 import styles from "../styles/Home.module.css";
@@ -13,6 +12,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { CloseOutlined } from "@material-ui/icons";
+import validator from "validator";
 
 export default function Home() {
   const [from, setFrom] = useState({ name: "", email: "" });
@@ -24,19 +24,41 @@ export default function Home() {
   const [errorrMessage, setErrorrMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [emptyError, setEmptyError] = useState(false);
+  const [errMessage, setErrMessage] = useState("");
+
+  function handleError(isError, message = "") {
+    setEmptyError(isError);
+    setErrMessage(message);
+  }
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (
-      from.name.length === 0 ||
-      from.email.length === 0 ||
-      subject.length === 0 ||
-      content.length === 0
-    ) {
-      setEmptyError(true);
-      return;
-    }
+    if (!validator.isLength(from.name, { min: 1 }))
+      return handleError(true, "Please enter a valid name");
+
+    if (!validator.isEmail(from.email))
+      return handleError(true, "Please enter a valid email address");
+
+    if (!validator.isLength(from.email, { min: 7 }))
+      return handleError(true, "Please enter a valid email address");
+
+    if (!validator.isLength(subject, { min: 1 }))
+      return handleError(true, "Please enter a valid subject");
+
+    if (!validator.isLength(content, { min: 1 }))
+      return handleError(true, "Please enter a valid content");
+
+    handleError(false);
+    // if (
+    //   from.name.length === 0 ||
+    //   from.email.length === 0 ||
+    //   subject.length === 0 ||
+    //   content.length === 0
+    // ) {
+    //   setEmptyError(true);
+    //   return;
+    // }
 
     setLoading(true);
     axios
@@ -195,7 +217,7 @@ export default function Home() {
             }
             sx={{ mb: 2 }}
           >
-            Please fill all fields
+            {errMessage}
           </Alert>
         </Collapse>
       </Container>
